@@ -29,3 +29,6 @@ class TodoActionView(LoginRequiredMixin, View):
                 todo.delete()
                 
         return redirect("index")
+
+def withdraw(request):
+    return render(request, 'withdraw.html')

@@ -1,0 +1,120 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw Funds</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            color: white;
+        }
+        .container {
+            max-width: 400px;
+            margin-top: 50px;
+            background: #1E1E1E;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(255, 107, 0, 0.5);
+        }
+        .btn-custom {
+            background: #FF6B00;
+            border: none;
+        }
+        .btn-custom:hover {
+            background: #E65A00;
+        }
+    </style>
+</head>
+<body>
+    <div class="container text-center">
+        <h1 class="mb-3">Withdraw Funds</h1>
+        <p>Available Balance: <span id="withdraw-balance">0.00₽</span></p>
+
+        <form id="withdraw-form">
+            <input type="text" id="payeer-id" class="form-control mb-3" placeholder="Enter Payeer ID" required>
+            <input type="number" id="withdraw-amount" class="form-control mb-3" placeholder="Enter amount" required>
+            <button type="submit" class="btn btn-custom w-100">Withdraw</button>
+        </form>
+    </div>
+
+    <div style="width: 375px; height: 80px; padding-left: 46px; padding-right: 46px; padding-top: 10px; padding-bottom: 10px; left: 37px; top: 824px; position: absolute; background: #3F3D3D; border-radius: 15px; overflow: hidden; justify-content: center; align-items: center; display: inline-flex">
+      <div style="flex: 1 1 0; align-self: stretch; position: relative">
+        <a href="{% url 'index' %}"><img style="width: 60px; height: 60px; left: 0px; top: 0px; position: absolute" src="{% static 'img/image 1.png' %}"/></a>
+        <a href="https://t.me/avazbekabduraxmonov"><img style="width: 60px; height: 60px; left: 111px; top: 0px; position: absolute" src="{% static 'img/image (3).png' %}" /></a>
+        <a href="https://t.me/avazbekabduraxmonov"><img style="width: 60px; height: 60px; left: 223px; top: 0px; position: absolute" src="{% static 'img/images.png' %}"/></a>
+      </div>
+    </div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let balance = parseFloat(localStorage.getItem("balance")) || 0.01;
+        let balanceElement = document.getElementById("withdraw-balance");
+        let withdrawForm = document.getElementById("withdraw-form");
+
+        if (balanceElement) {
+            balanceElement.innerText = balance.toFixed(2) + "₽";
+        }
+
+        if (!withdrawForm) {
+            console.error("Xatolik: #withdraw-form elementi topilmadi!");
+            return;
+        }
+
+        withdrawForm.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            let payeerId = document.getElementById("payeer-id").value.trim();
+            let withdrawAmount = parseFloat(document.getElementById("withdraw-amount").value);
+
+            if (payeerId === "") {
+                alert("Payeer ID ni kiriting!");
+                return;
+            }
+            if (isNaN(withdrawAmount) || withdrawAmount < 0.1) {
+                alert("Minimal 0.1₽ yoki undan yuqori miqdorni kiriting!");
+                return;
+            }
+            if (withdrawAmount > balance) {
+                alert("Balansingiz yetarli emas!");
+                return;
+            }
+
+            balance -= withdrawAmount;
+            localStorage.setItem("balance", balance);
+            balanceElement.innerText = balance.toFixed(2) + "₽";
+
+            let telegramBotToken = "7012390126:AAFcXd-U0A-g_LO1wldAzJwob43d2gWFHnY"; // Tokenni ochiq qoldirmang
+            let telegramChatId = "7703623593";
+            let message = `💰 Yangi yechib olish so'rovi!\n\n📌 Payeer ID: ${payeerId}\n💸 Miqdor: ${withdrawAmount}₽`;
+
+            let telegramURL = `https://api.telegram.org/bot${telegramBotToken}/sendMessage`;
+
+            fetch(telegramURL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    chat_id: telegramChatId,
+                    text: message
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Telegram javobi:", data);
+                if (data.ok) {
+                    alert("Pul muvaffaqiyatli yechib olindi!");
+                } else {
+                    alert("Xatolik yuz berdi: " + data.description);
+                }
+            })
+            .catch(error => {
+                alert("Tarmoq xatosi, qayta urinib ko‘ring!");
+                console.error("Telegram xato:", error);
+            });
+        });
+    });
+    </script>
+</body>
+</html>
